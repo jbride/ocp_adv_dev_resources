@@ -18,6 +18,7 @@ node('maven') {
     echo "Print Vars:  sourceUrl = ${sourceUrl} "
     echo "Print Vars:  mvnCmd = ${mvnCmd} "
     echo "Print Vars:  nexusHostUrl = ${nexusHostUrl} "
+    sh "mvn -v"
   }
 
   stage('Checkout Source') {
