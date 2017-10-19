@@ -9,9 +9,9 @@ node('maven') {
   def nexusHostUrl = params.NEXUS_HOST_URL
 
   // Define Maven Command. Make sure it points to the correct settings for our
-  // Nexus installation. The file nexus_openshift_settings.xml needs to be in the
+  // Nexus installation. The file nexus_settings.xml needs to be in the
   // Source Code repository.
-  def mvnCmd = "mvn -s nexus_openshift_settings.xml" 
+  def mvnCmd = "mvn -s nexus_settings.xml" 
 
   stage('Print Vars') {
     echo "Print Vars:  Jenkins BUILD_NUMBER = ${params.BUILD_NUMBER} "
