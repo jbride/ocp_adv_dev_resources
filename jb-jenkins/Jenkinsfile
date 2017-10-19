@@ -31,8 +31,9 @@ node('maven') {
     echo "Build war: mvnCmd = ${mvnCmd}"
     dir( "${projectName}" ) {
         pwd()
+        sh "${mvnCmd} clean package -DskipTests"
     }
-    
+    pwd()
   }
 
   // Using Maven run the unit tests
