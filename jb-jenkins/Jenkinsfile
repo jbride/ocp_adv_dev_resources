@@ -43,7 +43,8 @@ node('maven') {
   stage('Build war') {
     
     echo "Build war: mvnCmd = ${mvnCmd}"
-    sh "${mvnCmd} clean package -DskipTests"
+    sh "${mvnCmd} clean package -DskipTests -DnexusHostUrl=${nexusHostUrl}"
+    sh "ls -l target"
   }
 
   // Using Maven run the unit tests
