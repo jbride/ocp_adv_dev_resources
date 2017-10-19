@@ -14,7 +14,7 @@ node('maven') {
     // Get Source Code from SCM (Git) as configured in the Jenkins Project
     // Next line for inline script, "checkout scm" for Jenkinsfile from Gogs
     echo "Checkout Source: sourceUrl = ${sourceUrl} "
-    git '${sourceUrl}'
+    git  ${sourceUrl} 
   }
 
   // The following variables need to be defined at the top level and not inside
@@ -29,7 +29,7 @@ node('maven') {
   stage('Build war') {
     
     echo "Build war: mvnCmd = ${mvnCmd}"
-    dir('${projectName}') {
+    dir( ${projectName} ) {
         pwd()
     }
     
