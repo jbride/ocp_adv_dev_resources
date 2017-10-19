@@ -31,7 +31,8 @@ node('maven') {
     echo "Build war: mvnCmd = ${mvnCmd}"
     dir( "${projectName}" ) {
         pwd()
-        sh "${mvnCmd} clean package -DskipTests"
+        sh "ls -l "
+        //sh "${mvnCmd} clean package -DskipTests"
     }
     pwd()
   }
