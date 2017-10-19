@@ -29,6 +29,7 @@ node('maven') {
   stage('Build war') {
     
     echo "Build war: mvnCmd = ${mvnCmd}"
+    sh "ls -l "
     dir( "${projectName}" ) {
         pwd()
         sh "ls -l "
