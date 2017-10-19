@@ -3,12 +3,22 @@
 // Run this node on a Maven Slave
 // Maven Slaves have JDK and Maven already installed
 node('maven') {
+  // Needed to clone project
+  def sourceUrl = params.PROJECT_SOURCE_URL
+
+  def nexusHostUrl = params.NEXUS_HOST_URL
+
   // Define Maven Command. Make sure it points to the correct settings for our
   // Nexus installation. The file nexus_openshift_settings.xml needs to be in the
   // Source Code repository.
-  def mvnCmd = "mvn -s nexus_openshift_settings.xml"
-  def sourceUrl = params.PROJECT_SOURCE_URL
-  def projectName = params.PROJECT_NAME
+  def mvnCmd = "mvn -s nexus_openshift_settings.xml -DnexusHostUrl=${nexusHostUrl}" 
+
+  stage('Print Vars') {
+    echo "Print Vars:  Jenkins BUILD_NUMBER = ${params.BUILD_NUMBER} "
+    echo "Print Vars:  sourceUrl = ${sourceUrl} "
+    echo "Print Vars:  mvnCmd = ${mvnCmd} "
+    echo "Print Vars:  nexusHostUrl = ${nexusHostUrl} "
+  }
 
   stage('Checkout Source') {
     // Get Source Code from SCM (Git) as configured in the Jenkins Project
@@ -38,7 +48,7 @@ node('maven') {
   // Using Maven run the unit tests
   stage('Unit Tests') {
     echo "Unit Tests"
-    sh "${mvnCmd} clean test"
+    //sh "${mvnCmd} clean test"
   }
 
   // Using Maven call SonarQube for Code Analysis
@@ -61,7 +71,10 @@ node('maven') {
   //   push to Gig/Gogs will fail in case the version number didn't change. ${BUILD_NUMBER} is one of the Jenkins built-in
   //   variables.
   stage('Publish to Nexus') {
-    echo "Publish to Nexus "
+    echo "Publish to Nexus: Will use build with external artifacts approach"
+
+    // https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html
+    sh "${mvnCmd} deploy -DskipTests -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
   }
 
   // Build the OpenShift Image in OpenShift. 
