@@ -8,11 +8,13 @@ node('maven') {
   // Source Code repository.
   def mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
   def sourceUrl = params.PROJECT_SOURCE_URL
+  def projectName = params.PROJECT_NAME
 
   stage('Checkout Source') {
     // Get Source Code from SCM (Git) as configured in the Jenkins Project
     // Next line for inline script, "checkout scm" for Jenkinsfile from Gogs
     echo "Checkout Source: sourceUrl = ${sourceUrl} "
+    git '${sourceUrl}'
   }
 
   // The following variables need to be defined at the top level and not inside
@@ -25,7 +27,12 @@ node('maven') {
   // Using Maven build the war file
   // Do not run tests in this step
   stage('Build war') {
+    
     echo "Build war: mvnCmd = ${mvnCmd}"
+    dir('${projectName}') {
+        pwd()
+    }
+    
   }
 
   // Using Maven run the unit tests
