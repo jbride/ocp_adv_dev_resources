@@ -7,12 +7,12 @@ node('maven') {
   // Nexus installation. The file nexus_openshift_settings.xml needs to be in the
   // Source Code repository.
   def mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
+  def sourceUrl = params.PROJECT_SOURCE_URL
 
   stage('Checkout Source') {
     // Get Source Code from SCM (Git) as configured in the Jenkins Project
     // Next line for inline script, "checkout scm" for Jenkinsfile from Gogs
-    //git 'http://gogs.xyz-gogs.svc.cluster.local:3000/CICDLabs/openshift-tasks.git'
-    echo "Checkout Source"
+    echo "Checkout Source: sourceUrl = ${sourceUrl} "
   }
 
   // The following variables need to be defined at the top level and not inside
@@ -25,7 +25,7 @@ node('maven') {
   // Using Maven build the war file
   // Do not run tests in this step
   stage('Build war') {
-    echo "Build war"
+    echo "Build war: mvnCmd = ${mvnCmd}"
   }
 
   // Using Maven run the unit tests
@@ -113,5 +113,3 @@ def getArtifactIdFromPom(pom) {
   def matcher = readFile(pom) =~ '<artifactId>(.+)</artifactId>'
   matcher ? matcher[0][1] : null
 }
-    // TBD
-
