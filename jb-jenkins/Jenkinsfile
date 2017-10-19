@@ -14,7 +14,10 @@ node('maven') {
     // Get Source Code from SCM (Git) as configured in the Jenkins Project
     // Next line for inline script, "checkout scm" for Jenkinsfile from Gogs
     echo "Checkout Source: sourceUrl = ${sourceUrl} "
+
+    // This clones in working directory
     git "${sourceUrl}"
+    sh "ls -l "
   }
 
   // The following variables need to be defined at the top level and not inside
@@ -29,18 +32,13 @@ node('maven') {
   stage('Build war') {
     
     echo "Build war: mvnCmd = ${mvnCmd}"
-    sh "ls -l "
-    dir( "${projectName}" ) {
-        pwd()
-        sh "ls -l "
-        //sh "${mvnCmd} clean package -DskipTests"
-    }
-    pwd()
+    sh "${mvnCmd} clean package -DskipTests"
   }
 
   // Using Maven run the unit tests
   stage('Unit Tests') {
     echo "Unit Tests"
+    sh "${mvnCmd} clean test"
   }
 
   // Using Maven call SonarQube for Code Analysis
