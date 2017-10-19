@@ -8,6 +8,9 @@ node('maven') {
 
   def nexusHostUrl = params.NEXUS_HOST_URL
 
+  def devProject = param.DEV_PROJECT_NAME
+  def prodProject = param.PROD_PROJECT_NAME
+
   // Define Maven Command. Make sure it points to the correct settings for our
   // Nexus installation. The file nexus_settings.xml needs to be in the
   // Source Code repository.
@@ -18,6 +21,8 @@ node('maven') {
     echo "Print Vars:  sourceUrl = ${sourceUrl} "
     echo "Print Vars:  mvnCmd = ${mvnCmd} "
     echo "Print Vars:  nexusHostUrl = ${nexusHostUrl} "
+    echo "Print Vars:  devProject = ${devProject} "
+    echo "Print Vars:  prodProject = ${prodProject} "
     sh "mvn -v"
   }
 
@@ -34,9 +39,9 @@ node('maven') {
   // The following variables need to be defined at the top level and not inside
   // the scope of a stage - otherwise they would not be accessible from other stages.
   // Extract version and other properties from the pom.xml
-  //def groupId    = getGroupIdFromPom("pom.xml")
-  //def artifactId = getArtifactIdFromPom("pom.xml")
-  //def version    = getVersionFromPom("pom.xml")
+  def groupId    = getGroupIdFromPom("pom.xml")
+  def artifactId = getArtifactIdFromPom("pom.xml")
+  def version    = getVersionFromPom("pom.xml")
 
   // Using Maven build the war file
   // Do not run tests in this step
@@ -50,7 +55,7 @@ node('maven') {
   // Using Maven run the unit tests
   stage('Unit Tests') {
     echo "Unit Tests"
-    //sh "${mvnCmd} clean test"
+    //sh "${mvnCmd} clean test -DnexusHostUrl=${nexusHostUrl}"
   }
 
   // Using Maven call SonarQube for Code Analysis
@@ -77,6 +82,7 @@ node('maven') {
 
     // https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html
     sh "${mvnCmd} deploy -DskipTests -DnexusHostUrl=${nexusHostUrl} -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
+
   }
 
   // Build the OpenShift Image in OpenShift. 
@@ -86,6 +92,11 @@ node('maven') {
   // Also tag the image with "TestingCandidate-${version}" - e.g. TestingCandidate-1.5
   stage('Build OpenShift Image') {
     echo "Build OpenShift Image"
+
+    sh "oc project ${devProject}"
+    sh "oc set env bc/tasks MVN_TAG=${version}"
+    sh "oc set env bc/tasks NEXUS_HOST_URL=${nexusHostUrl}"
+    sh "oc start-build tasks --follow --from-file=./ROOT.war"
   }
 
   // Deploy the built image to the Development Environment. Pay close attention to WHICH image you are deploying.
