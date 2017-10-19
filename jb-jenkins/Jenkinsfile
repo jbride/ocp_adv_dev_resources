@@ -8,8 +8,8 @@ node('maven') {
 
   def nexusHostUrl = params.NEXUS_HOST_URL
 
-  def devProject = param.DEV_PROJECT_NAME
-  def prodProject = param.PROD_PROJECT_NAME
+  def devProject = params.DEV_PROJECT_NAME
+  def prodProject = params.PROD_PROJECT_NAME
 
   // Define Maven Command. Make sure it points to the correct settings for our
   // Nexus installation. The file nexus_settings.xml needs to be in the
