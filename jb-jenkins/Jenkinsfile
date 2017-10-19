@@ -11,7 +11,7 @@ node('maven') {
   // Define Maven Command. Make sure it points to the correct settings for our
   // Nexus installation. The file nexus_openshift_settings.xml needs to be in the
   // Source Code repository.
-  def mvnCmd = "mvn -s nexus_openshift_settings.xml -DnexusHostUrl=${nexusHostUrl}" 
+  def mvnCmd = "mvn -s nexus_openshift_settings.xml" 
 
   stage('Print Vars') {
     echo "Print Vars:  Jenkins BUILD_NUMBER = ${params.BUILD_NUMBER} "
@@ -74,7 +74,7 @@ node('maven') {
     echo "Publish to Nexus: Will use build with external artifacts approach"
 
     // https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html
-    sh "${mvnCmd} deploy -DskipTests -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
+    sh "${mvnCmd} deploy -DskipTests -DnexusHostUrl=${nexusHostUrl} -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
   }
 
   // Build the OpenShift Image in OpenShift. 
