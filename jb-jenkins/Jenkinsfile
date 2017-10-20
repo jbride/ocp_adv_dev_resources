@@ -97,7 +97,7 @@ node('maven') {
     sh "oc project ${devProject}"
     sh "oc set env bc/tasks MVN_TAG=${version}"
     sh "oc set env bc/tasks NEXUS_HOST_URL=${nexusHostUrl}"
-    sh "oc start-build tasks --follow --from-file=./ROOT.war"
+    sh "oc start-build tasks --follow"
   }
 
   // Deploy the built image to the Development Environment. Pay close attention to WHICH image you are deploying.
