@@ -49,7 +49,7 @@ node('maven') {
   stage('Build war') {
     
     echo "Build war: mvnCmd = ${mvnCmd}"
-    sh "${mvnCmd} clean package -DskipTests -DnexusHostUrl=${nexusHostUrl}"
+    //sh "${mvnCmd} clean package -DskipTests -DnexusHostUrl=${nexusHostUrl}"
     sh "ls -l target"
   }
 
@@ -82,7 +82,7 @@ node('maven') {
     echo "Publish to Nexus: Will use build with external artifacts approach"
 
     // https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html
-    sh "${mvnCmd} deploy -DskipTests -DnexusHostUrl=${nexusHostUrl} -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
+    //sh "${mvnCmd} deploy -DskipTests -DnexusHostUrl=${nexusHostUrl} -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
 
   }
 
@@ -94,10 +94,14 @@ node('maven') {
   stage('Build OpenShift Image') {
     echo "Build OpenShift Image"
 
+    // 1) Initiate Build (which creates an image stream
     sh "oc project ${devProject}"
     sh "oc set env bc/tasks MVN_TAG=${version}"
     sh "oc set env bc/tasks NEXUS_HOST_URL=${nexusHostUrl}"
     sh "oc start-build tasks --follow"
+
+    // 2) tag
+    openshiftTag alias: 'false', destStream: 'tasks', destTag: ${version}, srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
   }
 
   // Deploy the built image to the Development Environment. Pay close attention to WHICH image you are deploying.
@@ -105,6 +109,13 @@ node('maven') {
   // of your application.
   stage('Deploy to Dev') {
     echo "Deploy to Dev"
+
+    sh "oc project ${devProject}"
+    sh "oc patch dc tasks --patch '{\"spec\": { \"triggers\": [ { \"type\": \"ImageChange\", \"imageChangeParams\": { \"containerNames\": [ \"tasks\" ], \"from\": { \"kind\": \"ImageStreamTag\", \"namespace\": \"xyz-tasks-dev\", \"name\": \"tasks:${version}\"}}}]}}' -n xyz-tasks-dev"
+
+    openshiftDeploy depCfg: 'tasks', verbose: 'false', waitTime: '', waitUnit: 'sec'
+    //openshiftVerifyDeployment depCfg: 'tasks', namespace: 'xyz-tasks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+    //openshiftVerifyService namespace: 'xyz-tasks-dev', svcName: 'tasks', verbose: 'false'
   }
 
   // Run some integration tests (see the openshift-tasks Github Repository README.md for ideas).
