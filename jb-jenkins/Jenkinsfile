@@ -50,7 +50,6 @@ node('maven') {
     
     echo "Build war: mvnCmd = ${mvnCmd}"
     //sh "${mvnCmd} clean package -DskipTests -DnexusHostUrl=${nexusHostUrl}"
-    sh "ls -l target"
   }
 
   // Using Maven run the unit tests
