@@ -10,6 +10,8 @@ node('maven') {
 
   def devProject = params.DEV_PROJECT_NAME
   def prodProject = params.PROD_PROJECT_NAME
+  def majorReleaseNumber = params.MAJOR_RELEASE_NUMBER
+  def jenkinsBuildNumber = params.BUILD_NUMBER
 
   // Define Maven Command. Make sure it points to the correct settings for our
   // Nexus installation. The file nexus_settings.xml needs to be in the
@@ -23,6 +25,8 @@ node('maven') {
     echo "Print Vars:  nexusHostUrl = ${nexusHostUrl} "
     echo "Print Vars:  devProject = ${devProject} "
     echo "Print Vars:  prodProject = ${prodProject} "
+    echo "Print Vars:  majorReleaseNumber = ${majorReleaseNumber} "
+    echo "Print Vars:  jenkinsBuildNumber = ${jenkinsBuildNumber} "
     sh "mvn -v"
     sh "oc whoami"
   }
@@ -42,15 +46,20 @@ node('maven') {
   // Extract version and other properties from the pom.xml
   def groupId    = getGroupIdFromPom("pom.xml")
   def artifactId = getArtifactIdFromPom("pom.xml")
-  def version    = getVersionFromPom("pom.xml")
 
   // Using Maven build the war file
   // Do not run tests in this step
-  stage('Build war') {
+  stage('Build app') {
+
+    // Increment version of app using maven versions plugin
+    // http://www.mojohaus.org/versions-maven-plugin/set-mojo.html
+    // 
+    sh "${mvnCmd} versions:set -DgenerateBackupPoms=false -DnewVersion=${majorReleaseNumber}-${jenkinsBuildNumber}"
     
-    echo "Build war: mvnCmd = ${mvnCmd}"
+    echo "Build app: mvnCmd = ${mvnCmd}"
     sh "${mvnCmd} clean package -DskipTests -DnexusHostUrl=${nexusHostUrl}"
   }
+
 
   // Using Maven run the unit tests
   stage('Unit Tests') {
@@ -83,6 +92,15 @@ node('maven') {
     // https://maven.apache.org/plugins/maven-deploy-plugin/deploy-mojo.html
     sh "${mvnCmd} deploy -DskipTests -DnexusHostUrl=${nexusHostUrl} -DaltDeploymentRepository=nexus::default::${nexusHostUrl}/repository/releases"
 
+  }
+
+  // Now that source has been compiled, tested and pushed to nexus, determine version
+  def version    = getVersionFromPom("pom.xml")
+
+  stage('Commit version') {
+    echo "Commit version to gogs: version = ${version}"
+    def commitMsg = "Build " + version
+    sh "git add **/pom.xml && git commit -m \"${commitMsg}\" && git push origin master
   }
 
   // Build the OpenShift Image in OpenShift. 
