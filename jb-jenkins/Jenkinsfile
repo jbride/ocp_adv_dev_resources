@@ -24,6 +24,7 @@ node('maven') {
     echo "Print Vars:  devProject = ${devProject} "
     echo "Print Vars:  prodProject = ${prodProject} "
     sh "mvn -v"
+    sh "oc whoami"
   }
 
   stage('Checkout Source') {
