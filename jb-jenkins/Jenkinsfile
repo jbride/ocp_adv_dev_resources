@@ -54,7 +54,7 @@ node('maven') {
     // Increment version of app using maven versions plugin
     // http://www.mojohaus.org/versions-maven-plugin/set-mojo.html
     // 
-    sh "${mvnCmd} versions:set -DgenerateBackupPoms=false -DnewVersion=${majorReleaseNumber}-${jenkinsBuildNumber}"
+    sh "${mvnCmd} versions:set -DgenerateBackupPoms=false -DnewVersion=${majorReleaseNumber}-${jenkinsBuildNumber} -DnexusHostUrl=${nexusHostUrl}"
     
     echo "Build app: mvnCmd = ${mvnCmd}"
     sh "${mvnCmd} clean package -DskipTests -DnexusHostUrl=${nexusHostUrl}"
