@@ -11,7 +11,7 @@ node('maven') {
   def devProject = params.DEV_PROJECT_NAME
   def prodProject = params.PROD_PROJECT_NAME
   def majorReleaseNumber = params.MAJOR_RELEASE_NUMBER
-  def jenkinsBuildNumber = params.BUILD_NUMBER
+  def jenkinsBuildNumber = "${BUILD_NUMBER}"
 
   // Define Maven Command. Make sure it points to the correct settings for our
   // Nexus installation. The file nexus_settings.xml needs to be in the
