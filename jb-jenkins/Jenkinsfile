@@ -100,7 +100,7 @@ node('maven') {
   stage('Commit version') {
     echo "Commit version to gogs: version = ${version}"
     def commitMsg = "Build " + version
-    sh "git add **/pom.xml && git commit -m \"${commitMsg}\" && git push origin master
+    sh "git add **/pom.xml && git commit -m ${commitMsg} && git push origin master"
   }
 
   // Build the OpenShift Image in OpenShift. 
