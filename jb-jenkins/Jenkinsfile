@@ -101,8 +101,8 @@ node('maven') {
     echo "Commit version to gogs: version = ${version}"
 
     // TO-DO: Add /home/jenkins/.gitconfig  as a layer to jenkins slave
-    git config --global user.email "gpte-jenkins+1@redhat.com"
-    git config --global user.name "gpte-jenkins"
+    sh "git config --global user.email \"gpte-jenkins+1@redhat.com\" "
+    sh "git config --global user.name \"gpte-jenkins\" "
 
     def commitMsg = "Build " + version
     sh "git add pom.xml && git commit -m \" ${commitMsg} \" && git push origin master"
