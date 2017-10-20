@@ -93,14 +93,14 @@ node('maven') {
   stage('Build OpenShift Image') {
     echo "Build OpenShift Image"
 
-    // 1) Initiate Build (which creates an image stream
+    // 1) Initiate Build (which creates/add to an image stream for this project  in internal OCP registry)
     sh "oc project ${devProject}"
-    sh "oc set env bc/tasks MVN_TAG=${version}"
-    sh "oc set env bc/tasks NEXUS_HOST_URL=${nexusHostUrl}"
-    sh "oc start-build tasks --follow"
+    //sh "oc set env bc/tasks MVN_TAG=${version}"
+    //sh "oc set env bc/tasks NEXUS_HOST_URL=${nexusHostUrl}"
+    //sh "oc start-build tasks --follow"
 
     // 2) tag
-    openshiftTag alias: 'false', destStream: 'tasks', destTag: ${version}, srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
+    openshiftTag alias: 'false', destStream: 'tasks', destTag: "${version}", srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
   }
 
   // Deploy the built image to the Development Environment. Pay close attention to WHICH image you are deploying.
